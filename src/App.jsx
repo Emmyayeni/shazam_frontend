@@ -107,9 +107,8 @@ export default function ShazamForFood() {
               <input
                 type="file"
                 id="imageInput"
-                accept="image/*"
+                accept="image/*" // allow any image (gallery + camera on mobile)
                 onChange={handleFileChange}
-                capture="environment" // opens phone camera on mobile
                 style={{ display: "none" }}
               />
 
