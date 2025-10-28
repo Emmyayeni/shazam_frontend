@@ -43,7 +43,7 @@ export default function ShazamForFood() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${BACKEND_URL}`, {
+      const res = await fetch(BACKEND_URL, {
         method: "POST",
         body: formData,
       });
