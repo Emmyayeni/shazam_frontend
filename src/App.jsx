@@ -1,3 +1,4 @@
+// ShazamForFood.jsx
 import React, { useState } from "react";
 import { Camera, ChefHat, Clock, Users, X } from "lucide-react";
 import "./App.css";
@@ -12,9 +13,10 @@ export default function ShazamForFood() {
   const [loading, setLoading] = useState(false);
   const [showRecipe, setShowRecipe] = useState(false);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // e.g., https://www.naijafood.live/predict
   const recipe = prediction ? getRecipe(prediction) : null;
 
+  // Handle file selection
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -32,6 +34,7 @@ export default function ShazamForFood() {
     }
   };
 
+  // Send file to backend for prediction
   const predictImage = async () => {
     if (!file) {
       alert("Please upload an image first.");
@@ -43,17 +46,25 @@ export default function ShazamForFood() {
     setLoading(true);
 
     try {
-      const res = await fetch(BACKEND_URL, {
+      const res = await fetch(`${BACKEND_URL}/predict`, {
         method: "POST",
         body: formData,
       });
+
       const data = await res.json();
 
-      setPrediction(data.prediction || "Unknown");
-      setConfidence(data.confidence || 0);
-      setAccuracy(data.confidence ? (data.confidence * 100).toFixed(0) : 0);
+      if (data.error) {
+        alert(`Prediction failed: ${data.error}`);
+        setPrediction("Unknown");
+        setConfidence(0);
+        setAccuracy(0);
+      } else {
+        setPrediction(data.prediction || "Unknown");
+        setConfidence(data.confidence || 0);
+        setAccuracy(data.confidence ? (data.confidence * 100).toFixed(0) : 0);
+      }
     } catch (err) {
-      alert("Prediction failed.");
+      alert("Prediction failed. Check your network or backend.");
     } finally {
       setLoading(false);
     }
@@ -91,13 +102,14 @@ export default function ShazamForFood() {
                   <Camera size={48} />
                 </div>
                 <p className="upload-text">Click to upload or drag and drop</p>
-                <p className="upload-hint">PNG, JPG, GIF up to 5MB</p>
+                <p className="upload-hint">PNG, JPG up to 16MB</p>
               </label>
               <input
                 type="file"
                 id="imageInput"
                 accept="image/*"
                 onChange={handleFileChange}
+                capture="environment" // opens phone camera on mobile
                 style={{ display: "none" }}
               />
 
@@ -107,7 +119,7 @@ export default function ShazamForFood() {
                 </div>
               )}
 
-              {loading && <div className="loading-spinner">Loading...</div>}
+              {loading && <div className="loading-spinner">Analyzing...</div>}
 
               <button
                 onClick={predictImage}
